@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar Múltiplos Bilhetes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Gerar Bilhetes do Tripulante</h1>
+        <form id="generate-tickets-form">
+            <div class="form-group">
+                <label for="quantity">Quantidade de Bilhetes:</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="50" required>
+            </div>
+            <div class="form-group">
+                <label for="numbers_per_ticket">Números por Bilhete:</label>
+                <select class="form-control" id="numbers_per_ticket" name="numbers_per_ticket" required>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cpf">CPF do Tripulante:</label>
+                <input type="text" class="form-control" id="cpf" name="cpf" maxlength="11" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Gerar Bilhetes</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('generate-tickets-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const quantity = document.getElementById('quantity').value;
+            const numbersPerTicket = document.getElementById('numbers_per_ticket').value;
+            const cpf = document.getElementById('cpf').value;
+
+            fetch(`http://localhost:8080/generate-multiple-tickets?quantity=${quantity}&numbers_per_ticket=${numbersPerTicket}&cpf=${cpf}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultHtml = '<h3>Bilhetes Gerados:</h3>';
+                    if (Array.isArray(data)) {
+                        data.forEach((ticket, index) => {
+                            resultHtml += `<p><strong>Bilhete ${index + 1}:</strong> ${ticket.join(', ')}</p>`;
+                        });
+                    } else {
+                        resultHtml += `<p>${data.message || 'Erro desconhecido'}</p>`;
+                    }
+                    document.getElementById('result').innerHTML = resultHtml;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = '<p>Erro ao gerar bilhetes. Tente novamente mais tarde.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
